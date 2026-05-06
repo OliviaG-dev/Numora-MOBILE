@@ -14,6 +14,14 @@ type HomeProps = {
   onDeleteReading: (readingId: string) => Promise<void>;
   onGoToCreate: () => void;
   onGoToNumerology: () => void;
+  onGoToDateAnalyzer: () => void;
+  onGoToNameAnalyzer: () => void;
+  onGoToDailyVibration: () => void;
+  onGoToPlaceVibration: () => void;
+  onGoToCompatibilityAnalyzer: () => void;
+  onGoToReadings: () => void;
+  onGoToProfile: () => void;
+  onGoToSettings: () => void;
   onLogout: () => Promise<void>;
 };
 
@@ -27,6 +35,14 @@ export function Home({
   onDeleteReading,
   onGoToCreate,
   onGoToNumerology,
+  onGoToDateAnalyzer,
+  onGoToNameAnalyzer,
+  onGoToDailyVibration,
+  onGoToPlaceVibration,
+  onGoToCompatibilityAnalyzer,
+  onGoToReadings,
+  onGoToProfile,
+  onGoToSettings,
   onLogout
 }: HomeProps) {
   useEffect(() => {
@@ -42,8 +58,32 @@ export function Home({
           <Pressable style={styles.primaryButton} onPress={onGoToCreate}>
             <Text style={styles.primaryButtonText}>New reading</Text>
           </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToReadings}>
+            <Text style={styles.primaryButtonText}>Readings</Text>
+          </Pressable>
           <Pressable style={styles.primaryButton} onPress={onGoToNumerology}>
             <Text style={styles.primaryButtonText}>Numerology</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToDateAnalyzer}>
+            <Text style={styles.primaryButtonText}>Date analyzer</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToNameAnalyzer}>
+            <Text style={styles.primaryButtonText}>Name analyzer</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToDailyVibration}>
+            <Text style={styles.primaryButtonText}>Daily vibration</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToPlaceVibration}>
+            <Text style={styles.primaryButtonText}>Place vibration</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToCompatibilityAnalyzer}>
+            <Text style={styles.primaryButtonText}>Compatibility</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToProfile}>
+            <Text style={styles.primaryButtonText}>Profile</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToSettings}>
+            <Text style={styles.primaryButtonText}>Settings</Text>
           </Pressable>
           <Pressable style={styles.secondaryButton} onPress={() => void onLogout()}>
             <Text style={styles.secondaryButtonText}>Logout</Text>
@@ -80,6 +120,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
     marginVertical: 10
   },

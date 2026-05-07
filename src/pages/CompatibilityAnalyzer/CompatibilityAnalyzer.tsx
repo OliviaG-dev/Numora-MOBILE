@@ -10,14 +10,108 @@ type CompatibilityResult = {
   score: number;
   tone: "harmonious" | "balanced" | "growth";
   summary: string;
+  breakdown: {
+    lifePath: number;
+    expression: number;
+    emotional: number;
+  };
+  pair: {
+    lifePath: [number, number];
+    expression: [number, number];
+  };
   strengths: string[];
   challenges: string[];
+  recommendations: string[];
+  relationshipInsights: Array<{
+    title: string;
+    lines: string[];
+  }>;
 };
 
 const RELATIONSHIP_LABELS: Record<CompatibilityKind, string> = {
   love: "Love",
   friendship: "Friendship",
   work: "Work"
+};
+
+const RELATIONSHIP_HINTS: Record<
+  CompatibilityKind,
+  {
+    strengths: string[];
+    challenges: string[];
+    recommendations: string[];
+    insights: Array<{ title: string; lines: string[] }>;
+  }
+> = {
+  love: {
+    strengths: [
+      "Mutual attraction is easier when values are explicit.",
+      "Emotional resonance supports long-term commitment."
+    ],
+    challenges: [
+      "Idealization can hide practical incompatibilities.",
+      "Strong chemistry can create avoidable emotional loops."
+    ],
+    recommendations: [
+      "Create a weekly check-in ritual focused on needs and gratitude.",
+      "Define shared boundaries before major decisions."
+    ],
+    insights: [
+      {
+        title: "Heart dynamic",
+        lines: [
+          "Your love compatibility reflects emotional rhythm and attachment style.",
+          "Shared rituals stabilize the relationship during stressful phases."
+        ]
+      }
+    ]
+  },
+  friendship: {
+    strengths: [
+      "Friendship thrives through complementary social energy.",
+      "Different perspectives can increase trust and maturity."
+    ],
+    challenges: [
+      "Communication mismatch may create silent misunderstandings.",
+      "Uneven emotional availability can frustrate both sides."
+    ],
+    recommendations: [
+      "Set clear expectations around availability and support.",
+      "Use shared activities to reinforce connection over time."
+    ],
+    insights: [
+      {
+        title: "Friendship vibe",
+        lines: [
+          "Your friendship score reflects trust, joy and depth of connection.",
+          "Consistency is usually more important than intensity."
+        ]
+      }
+    ]
+  },
+  work: {
+    strengths: [
+      "Differentiated skills can increase execution quality.",
+      "Numerology contrast often improves strategic thinking."
+    ],
+    challenges: [
+      "Role ambiguity can trigger avoidable friction.",
+      "Pressure can amplify leadership style clashes."
+    ],
+    recommendations: [
+      "Assign ownership areas before project kickoff.",
+      "Use short feedback loops and decision logs."
+    ],
+    insights: [
+      {
+        title: "Work synergy",
+        lines: [
+          "Professional compatibility combines pace, structure and communication style.",
+          "Clear ownership reduces coordination cost."
+        ]
+      }
+    ]
+  }
 };
 
 export function CompatibilityAnalyzer() {
@@ -54,6 +148,9 @@ export function CompatibilityAnalyzer() {
       const expressionDiff = Math.abs(p1Expression - p2Expression);
       const relationBonus = relationshipType === "love" ? 4 : relationshipType === "friendship" ? 2 : 0;
       const computedScore = Math.max(35, Math.min(98, 90 - baseDiff * 6 - expressionDiff * 2 + relationBonus));
+      const lifePathScore = clampScore(100 - baseDiff * 11 + relationBonus);
+      const expressionScore = clampScore(100 - expressionDiff * 9 + relationBonus);
+      const emotionalScore = clampScore(Math.round((lifePathScore + expressionScore) / 2) - 3 + relationBonus);
 
       const tone: CompatibilityResult["tone"] =
         computedScore >= 82 ? "harmonious" : computedScore >= 65 ? "balanced" : "growth";
@@ -65,18 +162,33 @@ export function CompatibilityAnalyzer() {
             ? "Good compatibility with complementary dynamics."
             : "Contrastive profiles: alignment needs intentional effort.";
 
+      const relationHints = RELATIONSHIP_HINTS[relationshipType];
+
       setResult({
         score: computedScore,
         tone,
         summary,
+        breakdown: {
+          lifePath: lifePathScore,
+          expression: expressionScore,
+          emotional: emotionalScore
+        },
+        pair: {
+          lifePath: [p1LifePath, p2LifePath],
+          expression: [p1Expression, p2Expression]
+        },
         strengths: [
-          `Life paths: ${p1LifePath} and ${p2LifePath}`,
-          `Expression numbers: ${p1Expression} and ${p2Expression}`
+          `Life paths ${p1LifePath}/${p2LifePath} create a ${tone} base for this relationship.`,
+          `Expression numbers ${p1Expression}/${p2Expression} shape your communication style.`,
+          ...relationHints.strengths
         ],
         challenges: [
-          "Keep shared goals explicit.",
-          "Review decisions when emotions or pressure increase."
-        ]
+          `Life path gap of ${baseDiff} can lead to different priorities.`,
+          `Expression gap of ${expressionDiff} may require extra communication clarity.`,
+          ...relationHints.challenges
+        ],
+        recommendations: relationHints.recommendations,
+        relationshipInsights: relationHints.insights
       });
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, "Unable to analyze compatibility"));
@@ -161,6 +273,17 @@ export function CompatibilityAnalyzer() {
             <Text style={styles.score}>{result.score}%</Text>
             <Text style={styles.line}>Tone: {result.tone}</Text>
             <Text style={styles.line}>{result.summary}</Text>
+            <Text style={styles.sectionTitle}>Numerology Pair</Text>
+            <Text style={styles.line}>
+              Life path: {result.pair.lifePath[0]} & {result.pair.lifePath[1]}
+            </Text>
+            <Text style={styles.line}>
+              Expression: {result.pair.expression[0]} & {result.pair.expression[1]}
+            </Text>
+            <Text style={styles.sectionTitle}>Breakdown</Text>
+            <Text style={styles.line}>Life path alignment: {result.breakdown.lifePath}%</Text>
+            <Text style={styles.line}>Expression alignment: {result.breakdown.expression}%</Text>
+            <Text style={styles.line}>Emotional dynamic: {result.breakdown.emotional}%</Text>
             <Text style={styles.sectionTitle}>Strengths</Text>
             {result.strengths.map((item) => (
               <Text key={item} style={styles.line}>- {item}</Text>
@@ -169,11 +292,37 @@ export function CompatibilityAnalyzer() {
             {result.challenges.map((item) => (
               <Text key={item} style={styles.line}>- {item}</Text>
             ))}
+            <Text style={styles.sectionTitle}>Recommendations</Text>
+            {result.recommendations.map((item) => (
+              <Text key={item} style={styles.line}>- {item}</Text>
+            ))}
+            {result.relationshipInsights.map((insight) => (
+              <View key={insight.title} style={styles.insightBox}>
+                <Text style={styles.insightTitle}>{insight.title}</Text>
+                {insight.lines.map((line) => (
+                  <Text key={line} style={styles.line}>
+                    - {line}
+                  </Text>
+                ))}
+              </View>
+            ))}
           </View>
         ) : null}
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function clampScore(value: number): number {
+  if (value < 35) {
+    return 35;
+  }
+
+  if (value > 98) {
+    return 98;
+  }
+
+  return value;
 }
 
 const styles = StyleSheet.create({
@@ -216,5 +365,21 @@ const styles = StyleSheet.create({
   error: { color: "#d1242f", fontWeight: "600" },
   score: { fontSize: 28, fontWeight: "800", color: "#1f6feb" },
   sectionTitle: { marginTop: 8, fontWeight: "700", color: "#222222" },
-  line: { color: "#222222" }
+  line: { color: "#222222" },
+  insightBox: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#e6e6e6",
+    borderRadius: 8,
+    padding: 10,
+    gap: 4,
+    backgroundColor: "#fcfcff"
+  },
+  insightTitle: {
+    fontWeight: "700",
+    color: "#1f6feb",
+    textTransform: "uppercase",
+    fontSize: 12,
+    letterSpacing: 0.5
+  }
 });

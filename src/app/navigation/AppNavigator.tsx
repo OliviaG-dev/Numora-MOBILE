@@ -5,6 +5,7 @@ import { CompatibilityAnalyzer } from "../../pages/CompatibilityAnalyzer/Compati
 import { DailyVibration } from "../../pages/DailyVibration/DailyVibration";
 import { DateAnalyzer } from "../../pages/DateAnalyzer/DateAnalyzer";
 import { Home } from "../../pages/Home/Home";
+import { MatrixDestiny } from "../../pages/MatrixDestiny/MatrixDestiny";
 import { NameAnalyzer } from "../../pages/NameAnalyzer/NameAnalyzer";
 import { NewReading } from "../../pages/NewReading/NewReading";
 import { Numerology } from "../../pages/Numerology/Numerology";
@@ -68,6 +69,7 @@ export function AppNavigator({
               onGoToCreate={() => navigation.navigate("NewReading")}
               onGoToReadings={() => navigation.navigate("Readings")}
               onGoToNumerology={() => navigation.navigate("Numerology")}
+              onGoToMatrixDestiny={() => navigation.navigate("MatrixDestiny")}
               onGoToDateAnalyzer={() => navigation.navigate("DateAnalyzer")}
               onGoToNameAnalyzer={() => navigation.navigate("NameAnalyzer")}
               onGoToDailyVibration={() => navigation.navigate("DailyVibration")}
@@ -111,6 +113,9 @@ export function AppNavigator({
               onCalculate={onCalculateNumerology}
             />
           )}
+        </Stack.Screen>
+        <Stack.Screen name="MatrixDestiny" options={{ title: "Matrix Destiny" }}>
+          {() => <MatrixDestiny initialMatrix={numerologyResult?.matrixDestiny ?? null} />}
         </Stack.Screen>
         <Stack.Screen name="DateAnalyzer" options={{ title: "Date Analyzer" }}>
           {() => <DateAnalyzer />}

@@ -1,10 +1,18 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { CompatibilityAnalyzer } from "../../pages/CompatibilityAnalyzer/CompatibilityAnalyzer";
+import { DailyVibration } from "../../pages/DailyVibration/DailyVibration";
+import { DateAnalyzer } from "../../pages/DateAnalyzer/DateAnalyzer";
 import { Home } from "../../pages/Home/Home";
+import { NameAnalyzer } from "../../pages/NameAnalyzer/NameAnalyzer";
 import { NewReading } from "../../pages/NewReading/NewReading";
 import { Numerology } from "../../pages/Numerology/Numerology";
+import { PlaceVibration } from "../../pages/PlaceVibration/PlaceVibration";
+import { Profile } from "../../pages/Profile/Profile";
+import { Readings } from "../../pages/Readings/Readings";
 import { ReadingDetail } from "../../pages/ReadingDetail/ReadingDetail";
+import { Settings } from "../../pages/Settings/Settings";
 import type { AppStackParamList } from "../../types/navigation.types";
 import type { NumerologyCalculatePayload, NumerologyResult } from "../../types/numerology.types";
 import type { CreateReadingPayload, Reading } from "../../types/reading.types";
@@ -58,10 +66,41 @@ export function AppNavigator({
               }
               onDeleteReading={onDeleteReading}
               onGoToCreate={() => navigation.navigate("NewReading")}
+              onGoToReadings={() => navigation.navigate("Readings")}
               onGoToNumerology={() => navigation.navigate("Numerology")}
+              onGoToDateAnalyzer={() => navigation.navigate("DateAnalyzer")}
+              onGoToNameAnalyzer={() => navigation.navigate("NameAnalyzer")}
+              onGoToDailyVibration={() => navigation.navigate("DailyVibration")}
+              onGoToPlaceVibration={() => navigation.navigate("PlaceVibration")}
+              onGoToCompatibilityAnalyzer={() =>
+                navigation.navigate("CompatibilityAnalyzer")
+              }
+              onGoToProfile={() => navigation.navigate("Profile")}
+              onGoToSettings={() => navigation.navigate("Settings")}
               onLogout={onLogout}
             />
           )}
+        </Stack.Screen>
+        <Stack.Screen name="Readings" options={{ title: "Readings" }}>
+          {({ navigation }) => (
+            <Readings
+              readings={readings}
+              loading={loading}
+              error={error}
+              onRefresh={onRefresh}
+              onOpenReading={(readingId) =>
+                navigation.navigate("ReadingDetail", { readingId })
+              }
+              onDeleteReading={onDeleteReading}
+              onGoToCreate={() => navigation.navigate("NewReading")}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="Profile" options={{ title: "Profile" }}>
+          {() => <Profile email={email} />}
+        </Stack.Screen>
+        <Stack.Screen name="Settings" options={{ title: "Settings" }}>
+          {() => <Settings onLogout={onLogout} />}
         </Stack.Screen>
         <Stack.Screen name="Numerology" options={{ title: "Numerology" }}>
           {() => (
@@ -72,6 +111,24 @@ export function AppNavigator({
               onCalculate={onCalculateNumerology}
             />
           )}
+        </Stack.Screen>
+        <Stack.Screen name="DateAnalyzer" options={{ title: "Date Analyzer" }}>
+          {() => <DateAnalyzer />}
+        </Stack.Screen>
+        <Stack.Screen name="NameAnalyzer" options={{ title: "Name Analyzer" }}>
+          {() => <NameAnalyzer />}
+        </Stack.Screen>
+        <Stack.Screen name="DailyVibration" options={{ title: "Daily Vibration" }}>
+          {() => <DailyVibration />}
+        </Stack.Screen>
+        <Stack.Screen name="PlaceVibration" options={{ title: "Place Vibration" }}>
+          {() => <PlaceVibration />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="CompatibilityAnalyzer"
+          options={{ title: "Compatibility Analyzer" }}
+        >
+          {() => <CompatibilityAnalyzer />}
         </Stack.Screen>
         <Stack.Screen name="NewReading" options={{ title: "New reading" }}>
           {({ navigation }) => (

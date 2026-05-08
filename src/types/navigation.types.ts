@@ -8,6 +8,7 @@ export type AppStackParamList = {
   Profile: undefined;
   Settings: undefined;
   Numerology: undefined;
+  MatrixDestiny: undefined;
   DateAnalyzer: undefined;
   NameAnalyzer: undefined;
   DailyVibration: undefined;

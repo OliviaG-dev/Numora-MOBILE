@@ -14,6 +14,7 @@ type HomeProps = {
   onDeleteReading: (readingId: string) => Promise<void>;
   onGoToCreate: () => void;
   onGoToNumerology: () => void;
+  onGoToMatrixDestiny: () => void;
   onGoToDateAnalyzer: () => void;
   onGoToNameAnalyzer: () => void;
   onGoToDailyVibration: () => void;
@@ -35,6 +36,7 @@ export function Home({
   onDeleteReading,
   onGoToCreate,
   onGoToNumerology,
+  onGoToMatrixDestiny,
   onGoToDateAnalyzer,
   onGoToNameAnalyzer,
   onGoToDailyVibration,
@@ -63,6 +65,9 @@ export function Home({
           </Pressable>
           <Pressable style={styles.primaryButton} onPress={onGoToNumerology}>
             <Text style={styles.primaryButtonText}>Numerology</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToMatrixDestiny}>
+            <Text style={styles.primaryButtonText}>Matrix destiny</Text>
           </Pressable>
           <Pressable style={styles.primaryButton} onPress={onGoToDateAnalyzer}>
             <Text style={styles.primaryButtonText}>Date analyzer</Text>

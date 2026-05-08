@@ -14,6 +14,7 @@ import { Profile } from "../../pages/Profile/Profile";
 import { Readings } from "../../pages/Readings/Readings";
 import { ReadingDetail } from "../../pages/ReadingDetail/ReadingDetail";
 import { Settings } from "../../pages/Settings/Settings";
+import { TreeOfLife } from "../../pages/TreeOfLife/TreeOfLife";
 import type { AppStackParamList } from "../../types/navigation.types";
 import type { NumerologyCalculatePayload, NumerologyResult } from "../../types/numerology.types";
 import type { CreateReadingPayload, Reading } from "../../types/reading.types";
@@ -70,6 +71,7 @@ export function AppNavigator({
               onGoToReadings={() => navigation.navigate("Readings")}
               onGoToNumerology={() => navigation.navigate("Numerology")}
               onGoToMatrixDestiny={() => navigation.navigate("MatrixDestiny")}
+              onGoToTreeOfLife={() => navigation.navigate("TreeOfLife")}
               onGoToDateAnalyzer={() => navigation.navigate("DateAnalyzer")}
               onGoToNameAnalyzer={() => navigation.navigate("NameAnalyzer")}
               onGoToDailyVibration={() => navigation.navigate("DailyVibration")}
@@ -116,6 +118,9 @@ export function AppNavigator({
         </Stack.Screen>
         <Stack.Screen name="MatrixDestiny" options={{ title: "Matrix Destiny" }}>
           {() => <MatrixDestiny initialMatrix={numerologyResult?.matrixDestiny ?? null} />}
+        </Stack.Screen>
+        <Stack.Screen name="TreeOfLife" options={{ title: "Tree of Life" }}>
+          {() => <TreeOfLife initialTree={numerologyResult?.treeOfLife ?? null} />}
         </Stack.Screen>
         <Stack.Screen name="DateAnalyzer" options={{ title: "Date Analyzer" }}>
           {() => <DateAnalyzer />}

@@ -19,8 +19,7 @@ export function NumerologySummary({ result }: NumerologySummaryProps) {
       <Text style={styles.line}>Birthday: {String(core.birthday ?? "-")}</Text>
       <Text style={styles.line}>Heart: {String(core.heart ?? "-")}</Text>
       <Text style={styles.line}>Realisation: {String(core.realisation ?? "-")}</Text>
-      <Text style={styles.jsonTitle}>Full payload</Text>
-      <Text style={styles.json}>{JSON.stringify(result, null, 2)}</Text>
+      <Text style={styles.hint}>Open Matrix Destiny or Tree of Life for extended results.</Text>
     </View>
   );
 }
@@ -40,13 +39,9 @@ const styles = StyleSheet.create({
   line: {
     color: "#202020"
   },
-  jsonTitle: {
+  hint: {
     marginTop: 10,
-    fontWeight: "700"
-  },
-  json: {
-    fontFamily: "monospace",
-    fontSize: 12,
-    color: "#3f3f3f"
+    fontSize: 13,
+    color: "#5f5f5f"
   }
 });

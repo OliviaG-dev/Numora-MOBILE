@@ -47,6 +47,7 @@ npm run start
 - `npm run android` : lance sur Android
 - `npm run ios` : lance sur iOS
 - `npm run web` : lance sur Web
+- `npm run type-check` : verification TypeScript (`tsc --noEmit`)
 
 ## Structure du projet
 
@@ -61,7 +62,17 @@ src/
     Home/
     NewReading/
     Numerology/
+    MatrixDestiny/
+    TreeOfLife/
     ReadingDetail/
+    Readings/
+    Profile/
+    Settings/
+    DateAnalyzer/
+    NameAnalyzer/
+    DailyVibration/
+    PlaceVibration/
+    CompatibilityAnalyzer/
   components/
     AuthForm/
     NumerologySummary/
@@ -83,6 +94,7 @@ src/
     reading.types.ts
   utils/
     apiBaseUrl.ts
+    structuredPayload.ts
 ```
 
 ## Fonctionnalites principales
@@ -90,6 +102,9 @@ src/
 - Authentification utilisateur
 - Navigation entre ecrans principaux
 - Consultation et gestion des lectures
-- Resume numerologique
+- Resume numerologique (cœurs de profil)
+- Matrix Destiny et Arbre de Vie (donnees API + vue structuree, arbre simplifie)
+- Analyseurs rapides (date, nom, vibration quotidienne, lieu, compatibilite)
+- Profil et parametres
 - Stockage securise local (tokens/session)
 

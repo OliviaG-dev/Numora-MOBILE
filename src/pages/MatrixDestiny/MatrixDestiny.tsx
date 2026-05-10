@@ -3,6 +3,7 @@ import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View 
 
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { buildStructuredSections } from "../../utils/structuredPayload";
 
 type MatrixDestinyProps = {
   initialMatrix: unknown;
@@ -31,7 +32,7 @@ export function MatrixDestiny({ initialMatrix }: MatrixDestinyProps) {
     }
   };
 
-  const sections = toSections(matrix);
+  const sections = buildStructuredSections(matrix);
   const isDisabled = isLoading || !fullName.trim() || !birthDate.trim();
 
   return (
@@ -83,90 +84,6 @@ export function MatrixDestiny({ initialMatrix }: MatrixDestinyProps) {
       </ScrollView>
     </SafeAreaView>
   );
-}
-
-type SectionLine = {
-  key: string;
-  label: string;
-  value: string;
-};
-
-type Section = {
-  key: string;
-  label: string;
-  lines: SectionLine[];
-};
-
-function toSections(value: unknown): Section[] {
-  if (!isPlainRecord(value)) {
-    return [];
-  }
-
-  return Object.entries(value).map(([sectionKey, sectionValue]) => {
-    if (!isPlainRecord(sectionValue)) {
-      return {
-        key: sectionKey,
-        label: formatLabel(sectionKey),
-        lines: [{ key: `${sectionKey}-value`, label: "Value", value: formatValue(sectionValue) }]
-      };
-    }
-
-    const lines = flattenRecord(sectionKey, sectionValue);
-    return {
-      key: sectionKey,
-      label: formatLabel(sectionKey),
-      lines
-    };
-  });
-}
-
-function flattenRecord(prefix: string, value: Record<string, unknown>): SectionLine[] {
-  return Object.entries(value).flatMap(([key, item]) => {
-    if (isPlainRecord(item)) {
-      return Object.entries(item).map(([childKey, childValue]) => ({
-        key: `${prefix}-${key}-${childKey}`,
-        label: `${formatLabel(key)} / ${formatLabel(childKey)}`,
-        value: formatValue(childValue)
-      }));
-    }
-
-    return [
-      {
-        key: `${prefix}-${key}`,
-        label: formatLabel(key),
-        value: formatValue(item)
-      }
-    ];
-  });
-}
-
-function formatValue(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-
-  return JSON.stringify(value);
-}
-
-function formatLabel(raw: string): string {
-  if (!raw) {
-    return raw;
-  }
-
-  const normalized = raw
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[_-]+/g, " ")
-    .trim();
-
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
-
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 const styles = StyleSheet.create({

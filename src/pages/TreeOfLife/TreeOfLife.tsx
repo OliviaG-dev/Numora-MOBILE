@@ -3,6 +3,12 @@ import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View 
 
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import {
+  buildStructuredSections,
+  formatStructuredLabel,
+  formatStructuredValue,
+  isPlainObjectRecord
+} from "../../utils/structuredPayload";
 
 type TreeOfLifeProps = {
   initialTree: unknown;
@@ -31,7 +37,7 @@ export function TreeOfLife({ initialTree }: TreeOfLifeProps) {
     }
   };
 
-  const sections = toSections(tree);
+  const sections = buildStructuredSections(tree);
   const visualization = toTreeVisualization(tree);
   const isDisabled = isLoading || !fullName.trim() || !birthDate.trim();
 
@@ -86,7 +92,7 @@ export function TreeOfLife({ initialTree }: TreeOfLifeProps) {
 
             {visualization.dominantPillar ? (
               <Text style={styles.dominantText}>
-                Dominant pillar: {formatLabel(visualization.dominantPillar)}
+                Dominant pillar: {formatStructuredLabel(visualization.dominantPillar)}
               </Text>
             ) : null}
 
@@ -204,92 +210,8 @@ type TreeVisualization = {
   dominantPillar: string | null;
 };
 
-type SectionLine = {
-  key: string;
-  label: string;
-  value: string;
-};
-
-type Section = {
-  key: string;
-  label: string;
-  lines: SectionLine[];
-};
-
-function toSections(value: unknown): Section[] {
-  if (!isPlainRecord(value)) {
-    return [];
-  }
-
-  return Object.entries(value).map(([sectionKey, sectionValue]) => {
-    if (!isPlainRecord(sectionValue)) {
-      return {
-        key: sectionKey,
-        label: formatLabel(sectionKey),
-        lines: [{ key: `${sectionKey}-value`, label: "Value", value: formatValue(sectionValue) }]
-      };
-    }
-
-    const lines = flattenRecord(sectionKey, sectionValue);
-    return {
-      key: sectionKey,
-      label: formatLabel(sectionKey),
-      lines
-    };
-  });
-}
-
-function flattenRecord(prefix: string, value: Record<string, unknown>): SectionLine[] {
-  return Object.entries(value).flatMap(([key, item]) => {
-    if (isPlainRecord(item)) {
-      return Object.entries(item).map(([childKey, childValue]) => ({
-        key: `${prefix}-${key}-${childKey}`,
-        label: `${formatLabel(key)} / ${formatLabel(childKey)}`,
-        value: formatValue(childValue)
-      }));
-    }
-
-    return [
-      {
-        key: `${prefix}-${key}`,
-        label: formatLabel(key),
-        value: formatValue(item)
-      }
-    ];
-  });
-}
-
-function formatValue(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-
-  return JSON.stringify(value);
-}
-
-function formatLabel(raw: string): string {
-  if (!raw) {
-    return raw;
-  }
-
-  const normalized = raw
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[_-]+/g, " ")
-    .trim();
-
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
-
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function toTreeVisualization(value: unknown): TreeVisualization {
-  if (!isPlainRecord(value)) {
+  if (!isPlainObjectRecord(value)) {
     return {
       sephirothValues: null,
       pillarBalance: null,
@@ -297,26 +219,26 @@ function toTreeVisualization(value: unknown): TreeVisualization {
     };
   }
 
-  const sephirothValues = isPlainRecord(value.sephirothValues)
+  const sephirothValues = isPlainObjectRecord(value.sephirothValues)
     ? {
-        kether: formatValue(value.sephirothValues.kether),
-        chokhmah: formatValue(value.sephirothValues.chokhmah),
-        binah: formatValue(value.sephirothValues.binah),
-        chesed: formatValue(value.sephirothValues.chesed),
-        gevurah: formatValue(value.sephirothValues.gevurah),
-        tipheret: formatValue(value.sephirothValues.tipheret),
-        netzach: formatValue(value.sephirothValues.netzach),
-        hod: formatValue(value.sephirothValues.hod),
-        yesod: formatValue(value.sephirothValues.yesod),
-        malkuth: formatValue(value.sephirothValues.malkuth)
+        kether: formatStructuredValue(value.sephirothValues.kether),
+        chokhmah: formatStructuredValue(value.sephirothValues.chokhmah),
+        binah: formatStructuredValue(value.sephirothValues.binah),
+        chesed: formatStructuredValue(value.sephirothValues.chesed),
+        gevurah: formatStructuredValue(value.sephirothValues.gevurah),
+        tipheret: formatStructuredValue(value.sephirothValues.tipheret),
+        netzach: formatStructuredValue(value.sephirothValues.netzach),
+        hod: formatStructuredValue(value.sephirothValues.hod),
+        yesod: formatStructuredValue(value.sephirothValues.yesod),
+        malkuth: formatStructuredValue(value.sephirothValues.malkuth)
       }
     : null;
 
-  const pillarBalance = isPlainRecord(value.pillarBalance)
+  const pillarBalance = isPlainObjectRecord(value.pillarBalance)
     ? {
-        mercy: formatValue(value.pillarBalance.mercy),
-        severity: formatValue(value.pillarBalance.severity),
-        equilibrium: formatValue(value.pillarBalance.equilibrium)
+        mercy: formatStructuredValue(value.pillarBalance.mercy),
+        severity: formatStructuredValue(value.pillarBalance.severity),
+        equilibrium: formatStructuredValue(value.pillarBalance.equilibrium)
       }
     : null;
 

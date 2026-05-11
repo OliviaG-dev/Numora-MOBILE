@@ -19,7 +19,7 @@ export function NumerologySummary({ result }: NumerologySummaryProps) {
       <Text style={styles.line}>Birthday: {String(core.birthday ?? "-")}</Text>
       <Text style={styles.line}>Heart: {String(core.heart ?? "-")}</Text>
       <Text style={styles.line}>Realisation: {String(core.realisation ?? "-")}</Text>
-      <Text style={styles.hint}>Open Matrix Destiny or Tree of Life for extended results.</Text>
+      <Text style={styles.hint}>Open Matrix Destiny, Tree of Life, or Crystals for extended results.</Text>
     </View>
   );
 }

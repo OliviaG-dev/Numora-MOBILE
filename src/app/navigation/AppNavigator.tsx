@@ -2,6 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { CompatibilityAnalyzer } from "../../pages/CompatibilityAnalyzer/CompatibilityAnalyzer";
+import { Crystals } from "../../pages/Crystals/Crystals";
 import { DailyVibration } from "../../pages/DailyVibration/DailyVibration";
 import { DateAnalyzer } from "../../pages/DateAnalyzer/DateAnalyzer";
 import { Home } from "../../pages/Home/Home";
@@ -72,6 +73,7 @@ export function AppNavigator({
               onGoToNumerology={() => navigation.navigate("Numerology")}
               onGoToMatrixDestiny={() => navigation.navigate("MatrixDestiny")}
               onGoToTreeOfLife={() => navigation.navigate("TreeOfLife")}
+              onGoToCrystals={() => navigation.navigate("Crystals")}
               onGoToDateAnalyzer={() => navigation.navigate("DateAnalyzer")}
               onGoToNameAnalyzer={() => navigation.navigate("NameAnalyzer")}
               onGoToDailyVibration={() => navigation.navigate("DailyVibration")}
@@ -121,6 +123,9 @@ export function AppNavigator({
         </Stack.Screen>
         <Stack.Screen name="TreeOfLife" options={{ title: "Tree of Life" }}>
           {() => <TreeOfLife initialTree={numerologyResult?.treeOfLife ?? null} />}
+        </Stack.Screen>
+        <Stack.Screen name="Crystals" options={{ title: "Cristaux" }}>
+          {() => <Crystals />}
         </Stack.Screen>
         <Stack.Screen name="DateAnalyzer" options={{ title: "Date Analyzer" }}>
           {() => <DateAnalyzer />}

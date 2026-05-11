@@ -73,28 +73,35 @@ src/
     DailyVibration/
     PlaceVibration/
     CompatibilityAnalyzer/
+    Crystals/
   components/
     AuthForm/
     NumerologySummary/
     ReadingList/
+    ReadingDetailTabs/
+    CrystalProfile/
   hooks/
     useAuth.ts
     useNumerology.ts
     useReadings.ts
+    useCrystalProfile.ts
   services/
     apiClient.ts
     authService.ts
     numerologyService.ts
+    numerologyDataService.ts
     readingService.ts
     secureStorageService.ts
   types/
     auth.types.ts
+    crystal.types.ts
     navigation.types.ts
     numerology.types.ts
     reading.types.ts
   utils/
     apiBaseUrl.ts
     structuredPayload.ts
+    crystalLookup.ts
 ```
 
 ## Fonctionnalites principales
@@ -104,6 +111,8 @@ src/
 - Consultation et gestion des lectures
 - Resume numerologique (cœurs de profil)
 - Matrix Destiny et Arbre de Vie (donnees API + vue structuree, arbre simplifie)
+- Cristaux & lithotherapie (ecran dedie + onglet lecture, donnees `GET /numerology/data/*`)
+- Detail de lecture par onglets (Basiques, Dates, Karma, Matrix, Arbre, Travail, Cristaux)
 - Analyseurs rapides (date, nom, vibration quotidienne, lieu, compatibilite)
 - Profil et parametres
 - Stockage securise local (tokens/session)

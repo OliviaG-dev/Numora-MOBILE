@@ -16,6 +16,7 @@ type HomeProps = {
   onGoToNumerology: () => void;
   onGoToMatrixDestiny: () => void;
   onGoToTreeOfLife: () => void;
+  onGoToCrystals: () => void;
   onGoToDateAnalyzer: () => void;
   onGoToNameAnalyzer: () => void;
   onGoToDailyVibration: () => void;
@@ -39,6 +40,7 @@ export function Home({
   onGoToNumerology,
   onGoToMatrixDestiny,
   onGoToTreeOfLife,
+  onGoToCrystals,
   onGoToDateAnalyzer,
   onGoToNameAnalyzer,
   onGoToDailyVibration,
@@ -73,6 +75,9 @@ export function Home({
           </Pressable>
           <Pressable style={styles.primaryButton} onPress={onGoToTreeOfLife}>
             <Text style={styles.primaryButtonText}>Tree of life</Text>
+          </Pressable>
+          <Pressable style={styles.primaryButton} onPress={onGoToCrystals}>
+            <Text style={styles.primaryButtonText}>Crystals</Text>
           </Pressable>
           <Pressable style={styles.primaryButton} onPress={onGoToDateAnalyzer}>
             <Text style={styles.primaryButtonText}>Date analyzer</Text>

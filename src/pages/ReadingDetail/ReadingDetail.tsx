@@ -49,7 +49,7 @@ export function ReadingDetail({ readingId, onLoad, onBack }: ReadingDetailProps)
             <Text style={styles.createdAt}>Créée le : {reading.createdAt.slice(0, 10)}</Text>
           </View>
         ) : null}
-        {!loading && reading ? <ReadingDetailTabs results={reading.results} /> : null}
+        {!loading && reading ? <ReadingDetailTabs readingId={reading.id} results={reading.results} /> : null}
       </ScrollView>
     </SafeAreaView>
   );

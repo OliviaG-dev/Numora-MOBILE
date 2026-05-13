@@ -4,9 +4,11 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useCrystalProfile } from "../../hooks/useCrystalProfile";
 import { CrystalProfile } from "../CrystalProfile/CrystalProfile";
 import { ReadingBasiquesPanel } from "../ReadingBasiquesPanel/ReadingBasiquesPanel";
+import { ReadingBusinessPanel } from "../ReadingBusinessPanel/ReadingBusinessPanel";
 import { ReadingDatesPanel } from "../ReadingDatesPanel/ReadingDatesPanel";
 import { ReadingKarmicPanel } from "../ReadingKarmicPanel/ReadingKarmicPanel";
-import { RichObjectPayload } from "../RichObjectPayload/RichObjectPayload";
+import { ReadingMatrixPanel } from "../ReadingMatrixPanel/ReadingMatrixPanel";
+import { ReadingTreePanel } from "../ReadingTreePanel/ReadingTreePanel";
 
 type ReadingDetailTabsProps = {
   readingId: string;
@@ -72,11 +74,13 @@ export function ReadingDetailTabs({ readingId, results }: ReadingDetailTabsProps
           <ReadingKarmicPanel readingId={readingId} karmic={results.karmic} isActive />
         ) : null}
         {activeTab === "matrix" ? (
-          <RichObjectPayload title="Matrix Destiny" data={results.matrixDestiny} />
+          <ReadingMatrixPanel readingId={readingId} matrixDestiny={results.matrixDestiny} isActive />
         ) : null}
-        {activeTab === "arbre" ? <RichObjectPayload title="Arbre de vie" data={results.treeOfLife} /> : null}
+        {activeTab === "arbre" ? (
+          <ReadingTreePanel readingId={readingId} treeOfLife={results.treeOfLife} isActive />
+        ) : null}
         {activeTab === "travail" ? (
-          <RichObjectPayload title="Travail & business" data={results.business} />
+          <ReadingBusinessPanel readingId={readingId} business={results.business} isActive />
         ) : null}
         {activeTab === "lithotherapie" ? (
           lifePath !== null && expression !== null ? (

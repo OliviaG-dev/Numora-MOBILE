@@ -43,23 +43,47 @@ export function KeywordChips({ items }: { items: string[] }) {
 
 function InterpretationRecord({ record }: { record: Record<string, unknown> }) {
   const title = readString(record.title);
+  const subtitle = readString(record.subtitle);
+  const domain = readString(record.domain);
+  const hebrewName = readString(record.hebrewName);
+  const name = readString(record.name);
   const summary = readString(record.summary);
+  const keywordLabel = readString(record.keyword);
+  const interpretationText = readString(record.interpretation);
+  const motsCles = readString(record.mots_cles);
   const description =
     readString(record.description) ||
     readString(record.details) ||
     readString(record.essence);
-  const strengths = readString(record.strengths ?? record.strength);
-  const challenges = readString(record.challenges ?? record.challenge ?? record.emotional_challenge);
+  const strengthsStr = typeof record.strengths === "string" ? readString(record.strengths) : "";
+  const challengesStr =
+    typeof record.challenges === "string" ? readString(record.challenges) : "";
+  const strengthsList = Array.isArray(record.strengths) ? readStringArray(record.strengths) : [];
+  const challengesList = Array.isArray(record.challenges) ? readStringArray(record.challenges) : [];
+  const strengths = strengthsStr || readString(record.strength);
+  const challenges =
+    challengesStr || readString(record.challenge ?? record.emotional_challenge);
   const mission = readString(record.mission);
   const favorable = readString(record.favorable_for);
   const unfavorable = readString(record.unfavorable_for);
   const loveLanguage = readString(record.love_language);
+  const arcana = readString(record.arcana);
+  const pillar = readString(record.pillar);
   const keywords = readStringArray(record.keywords);
   const emotionalNeeds = record.emotional_needs;
 
   return (
     <View style={styles.gap}>
       {title ? <Text style={styles.heading}>{title}</Text> : null}
+      {name && name !== title ? <Text style={styles.subheading}>{name}</Text> : null}
+      {hebrewName ? <Text style={styles.hebrew}>{hebrewName}</Text> : null}
+      {subtitle ? <Text style={styles.subheading}>{subtitle}</Text> : null}
+      {domain ? (
+        <View>
+          <Text style={styles.kicker}>Domaine</Text>
+          <Text style={styles.paragraph}>{domain}</Text>
+        </View>
+      ) : null}
       {keywords.length ? <KeywordChips items={keywords} /> : null}
       {summary ? (
         <View>
@@ -67,19 +91,55 @@ function InterpretationRecord({ record }: { record: Record<string, unknown> }) {
           <Text style={styles.paragraph}>{summary}</Text>
         </View>
       ) : null}
-      {description ? (
+      {motsCles ? (
+        <View>
+          <Text style={styles.kicker}>Mots-clés</Text>
+          <Text style={styles.paragraph}>{motsCles}</Text>
+        </View>
+      ) : null}
+      {keywordLabel ? (
+        <View>
+          <Text style={styles.kicker}>Mot-clé</Text>
+          <Text style={styles.paragraph}>{keywordLabel}</Text>
+        </View>
+      ) : null}
+      {interpretationText ? (
         <View>
           <Text style={styles.kicker}>Interprétation</Text>
+          <Text style={styles.paragraph}>{interpretationText}</Text>
+        </View>
+      ) : null}
+      {description ? (
+        <View>
+          <Text style={styles.kicker}>{interpretationText ? "Détails" : "Interprétation"}</Text>
           <Text style={styles.paragraph}>{description}</Text>
         </View>
       ) : null}
-      {strengths ? (
+      {strengthsList.length ? (
+        <View>
+          <Text style={styles.kicker}>Forces</Text>
+          {strengthsList.map((line) => (
+            <Text key={line} style={styles.bullet}>
+              {"\u2022"} {line}
+            </Text>
+          ))}
+        </View>
+      ) : strengths ? (
         <View>
           <Text style={styles.kicker}>Forces</Text>
           <Text style={styles.paragraph}>{strengths}</Text>
         </View>
       ) : null}
-      {challenges ? (
+      {challengesList.length ? (
+        <View>
+          <Text style={styles.kicker}>Défis</Text>
+          {challengesList.map((line) => (
+            <Text key={line} style={styles.bullet}>
+              {"\u2022"} {line}
+            </Text>
+          ))}
+        </View>
+      ) : challenges ? (
         <View>
           <Text style={styles.kicker}>Défis</Text>
           <Text style={styles.paragraph}>{challenges}</Text>
@@ -107,6 +167,18 @@ function InterpretationRecord({ record }: { record: Record<string, unknown> }) {
         <View>
           <Text style={styles.kicker}>Langage du cœur</Text>
           <Text style={styles.paragraph}>{loveLanguage}</Text>
+        </View>
+      ) : null}
+      {arcana ? (
+        <View>
+          <Text style={styles.kicker}>Arcane</Text>
+          <Text style={styles.paragraph}>{arcana}</Text>
+        </View>
+      ) : null}
+      {pillar ? (
+        <View>
+          <Text style={styles.kicker}>Pilier</Text>
+          <Text style={styles.paragraph}>{pillar}</Text>
         </View>
       ) : null}
       {Array.isArray(emotionalNeeds) && emotionalNeeds.length ? (
@@ -138,6 +210,8 @@ const styles = StyleSheet.create({
   gap: { gap: 10 },
   muted: { color: "#666666", fontStyle: "italic" },
   heading: { fontSize: 16, fontWeight: "800", color: "#1a1a1a" },
+  subheading: { fontSize: 14, fontWeight: "600", color: "#3a3a48" },
+  hebrew: { fontSize: 13, color: "#5c5c6b" },
   kicker: {
     fontSize: 11,
     fontWeight: "800",

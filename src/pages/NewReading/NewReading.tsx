@@ -1,37 +1,143 @@
 import { useState } from "react";
-import { Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from "react-native";
 
-import type { CreateReadingPayload, ReadingCategory } from "../../types/reading.types";
+import { getApiErrorMessage } from "../../services/apiClient";
+import { calculateNumerology } from "../../services/numerologyService";
+import type { NumerologyCalculatePayload } from "../../types/numerology.types";
+import {
+  READING_CATEGORIES,
+  type CreateReadingPayload,
+  type Reading,
+  type ReadingCategory
+} from "../../types/reading.types";
+import { numerologyResultToReadingResults } from "../../utils/numerologyResultToReadingResults";
 
-type NewReadingProps = {
-  onSubmit: (payload: CreateReadingPayload) => Promise<void>;
-  onBack: () => void;
+const CATEGORY_LABELS: Record<ReadingCategory, string> = {
+  "life-path": "Chemin de vie",
+  compatibility: "Compatibilité",
+  forecast: "Prévisions",
+  custom: "Personnalisé"
 };
 
-export function NewReading({ onSubmit, onBack }: NewReadingProps) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+type NewReadingProps = {
+  onCreateReading: (payload: CreateReadingPayload) => Promise<Reading>;
+  onCancel: () => void;
+  onCreated: (readingId: string) => void;
+};
+
+function joinTrimmedParts(parts: Array<string | undefined>): string {
+  return parts
+    .map((p) => p?.trim())
+    .filter((p): p is string => Boolean(p && p.length > 0))
+    .join(" ");
+}
+
+function isValidIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
+    return false;
+  }
+  const d = new Date(`${value.trim()}T12:00:00.000Z`);
+  return !Number.isNaN(d.getTime());
+}
+
+export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingProps) {
+  const [readingTitle, setReadingTitle] = useState("");
+  const [firstGivenName, setFirstGivenName] = useState("");
+  const [secondGivenName, setSecondGivenName] = useState("");
+  const [thirdGivenName, setThirdGivenName] = useState("");
+  const [familyName, setFamilyName] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [category, setCategory] = useState<ReadingCategory>("custom");
-  const [results, setResults] = useState("{}");
-  const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState<ReadingCategory>("life-path");
+
+  const [referenceDate, setReferenceDate] = useState("");
+  const [streetNumber, setStreetNumber] = useState("");
+  const [streetName, setStreetName] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const buildNumerologyPayload = (): NumerologyCalculatePayload => {
+    const fullName = joinTrimmedParts([
+      firstGivenName,
+      secondGivenName,
+      thirdGivenName,
+      familyName
+    ]);
+    return {
+      fullName,
+      birthDate: birthDate.trim(),
+      referenceDate: referenceDate.trim() || undefined,
+      address:
+        streetNumber.trim() && streetName.trim()
+          ? { streetNumber: streetNumber.trim(), streetName: streetName.trim() }
+          : undefined,
+      locality:
+        postalCode.trim() && city.trim()
+          ? { postalCode: postalCode.trim(), city: city.trim() }
+          : undefined
+    };
+  };
+
+  const validate = (): string | null => {
+    if (!firstGivenName.trim()) {
+      return "Le premier prénom est obligatoire.";
+    }
+    if (!familyName.trim()) {
+      return "Le nom de famille est obligatoire.";
+    }
+    if (!birthDate.trim()) {
+      return "La date de naissance est obligatoire (AAAA-MM-JJ).";
+    }
+    if (!isValidIsoDate(birthDate)) {
+      return "La date de naissance doit être au format AAAA-MM-JJ valide.";
+    }
+    if (referenceDate.trim() && !isValidIsoDate(referenceDate)) {
+      return "La date de référence doit être au format AAAA-MM-JJ valide.";
+    }
+    return null;
+  };
 
   const handleSubmit = async () => {
     setError(null);
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const parsedResults = JSON.parse(results) as Record<string, unknown>;
-      await onSubmit({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+      const numerologyPayload = buildNumerologyPayload();
+      const { result } = await calculateNumerology(numerologyPayload);
+
+      const results = numerologyResultToReadingResults(result);
+      if (readingTitle.trim()) {
+        results.readingTitle = readingTitle.trim();
+      }
+
+      const firstName = joinTrimmedParts([firstGivenName, secondGivenName, thirdGivenName]);
+      const payload: CreateReadingPayload = {
+        firstName,
+        lastName: familyName.trim(),
         birthDate: birthDate.trim(),
         category,
-        results: parsedResults
-      });
-      onBack();
-    } catch {
-      setError("Invalid form or results JSON");
+        results
+      };
+
+      const reading = await onCreateReading(payload);
+      onCreated(reading.id);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, "Impossible d’enregistrer la lecture"));
     } finally {
       setSubmitting(false);
     }
@@ -39,49 +145,126 @@ export function NewReading({ onSubmit, onBack }: NewReadingProps) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Create reading</Text>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <Text style={styles.title}>Nouvelle lecture</Text>
+        <Text style={styles.hint}>
+          Saisis les informations de naissance : le calcul numérologique est fait automatiquement, puis la lecture
+          est enregistrée.
+        </Text>
+
+        <Text style={styles.sectionLabel}>Nom de la lecture (optionnel)</Text>
         <TextInput
-          placeholder="First name"
-          value={firstName}
-          onChangeText={setFirstName}
+          placeholder="Ex. Analyse personnelle"
+          value={readingTitle}
+          onChangeText={setReadingTitle}
           style={styles.input}
         />
+
+        <Text style={styles.sectionLabel}>Prénom *</Text>
         <TextInput
-          placeholder="Last name"
-          value={lastName}
-          onChangeText={setLastName}
+          placeholder="Premier prénom"
+          value={firstGivenName}
+          onChangeText={setFirstGivenName}
           style={styles.input}
+          autoCapitalize="words"
+        />
+
+        <Text style={styles.sectionLabel}>Autres prénoms (optionnel)</Text>
+        <TextInput
+          placeholder="Deuxième prénom"
+          value={secondGivenName}
+          onChangeText={setSecondGivenName}
+          style={styles.input}
+          autoCapitalize="words"
         />
         <TextInput
-          placeholder="Birth date (YYYY-MM-DD)"
+          placeholder="Troisième prénom"
+          value={thirdGivenName}
+          onChangeText={setThirdGivenName}
+          style={styles.input}
+          autoCapitalize="words"
+        />
+
+        <Text style={styles.sectionLabel}>Nom de famille *</Text>
+        <TextInput
+          placeholder="Nom de famille"
+          value={familyName}
+          onChangeText={setFamilyName}
+          style={styles.input}
+          autoCapitalize="words"
+        />
+
+        <Text style={styles.sectionLabel}>Date de naissance * (AAAA-MM-JJ)</Text>
+        <TextInput
+          placeholder="1990-05-14"
           value={birthDate}
           onChangeText={setBirthDate}
           style={styles.input}
+          keyboardType="numbers-and-punctuation"
         />
+
+        <Text style={styles.sectionLabel}>Catégorie</Text>
+        <View style={styles.categoryRow}>
+          {READING_CATEGORIES.map((cat) => (
+            <Pressable
+              key={cat}
+              onPress={() => setCategory(cat)}
+              style={[styles.categoryChip, category === cat && styles.categoryChipActive]}
+            >
+              <Text style={[styles.categoryChipText, category === cat && styles.categoryChipTextActive]}>
+                {CATEGORY_LABELS[cat]}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Text style={styles.sectionLabel}>Options de calcul (optionnel)</Text>
         <TextInput
-          placeholder="Category (life-path|compatibility|forecast|custom)"
-          value={category}
-          onChangeText={(value) => setCategory(value as ReadingCategory)}
+          placeholder="Date de référence (AAAA-MM-JJ)"
+          value={referenceDate}
+          onChangeText={setReferenceDate}
+          style={styles.input}
+          keyboardType="numbers-and-punctuation"
+        />
+        <Text style={styles.subSection}>Adresse</Text>
+        <TextInput
+          placeholder="Numéro de rue"
+          value={streetNumber}
+          onChangeText={setStreetNumber}
           style={styles.input}
         />
         <TextInput
-          placeholder='Results JSON (ex: {"score": 9})'
-          value={results}
-          onChangeText={setResults}
-          style={[styles.input, styles.multiline]}
-          multiline
+          placeholder="Nom de rue"
+          value={streetName}
+          onChangeText={setStreetName}
+          style={styles.input}
         />
+        <Text style={styles.subSection}>Localité</Text>
+        <TextInput
+          placeholder="Code postal"
+          value={postalCode}
+          onChangeText={setPostalCode}
+          style={styles.input}
+        />
+        <TextInput placeholder="Ville" value={city} onChangeText={setCity} style={styles.input} />
+
         {error ? <Text style={styles.error}>{error}</Text> : null}
+
         <View style={styles.actions}>
-          <Pressable style={styles.primaryButton} disabled={submitting} onPress={() => void handleSubmit()}>
-            <Text style={styles.primaryText}>{submitting ? "Saving..." : "Save"}</Text>
+          <Pressable
+            style={[styles.primaryButton, submitting && styles.buttonDisabled]}
+            disabled={submitting}
+            onPress={() => void handleSubmit()}
+          >
+            <Text style={styles.primaryText}>
+              {submitting ? "Calcul et enregistrement…" : "Calculer et enregistrer"}
+            </Text>
           </Pressable>
-          <Pressable style={styles.secondaryButton} onPress={onBack}>
-            <Text style={styles.secondaryText}>Cancel</Text>
+          <Pressable style={styles.secondaryButton} disabled={submitting} onPress={onCancel}>
+            <Text style={styles.secondaryText}>Annuler</Text>
           </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -91,14 +274,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f6f7fb"
   },
-  container: {
-    flex: 1,
+  scroll: {
     padding: 16,
-    gap: 10
+    paddingBottom: 40,
+    gap: 8
   },
   title: {
     fontSize: 24,
     fontWeight: "800"
+  },
+  hint: {
+    color: "#5f5f5f",
+    marginBottom: 8,
+    lineHeight: 20
+  },
+  sectionLabel: {
+    marginTop: 8,
+    fontWeight: "700",
+    color: "#333333"
+  },
+  subSection: {
+    marginTop: 4,
+    fontWeight: "600",
+    color: "#4d4d4d"
   },
   input: {
     borderWidth: 1,
@@ -108,19 +306,46 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: "#ffffff"
   },
-  multiline: {
-    minHeight: 80,
-    textAlignVertical: "top"
+  categoryRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4
+  },
+  categoryChip: {
+    borderWidth: 1,
+    borderColor: "#d8d8d8",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#ffffff"
+  },
+  categoryChipActive: {
+    backgroundColor: "#1f6feb",
+    borderColor: "#1f6feb"
+  },
+  categoryChipText: {
+    color: "#333333",
+    fontWeight: "600",
+    fontSize: 13
+  },
+  categoryChipTextActive: {
+    color: "#ffffff"
   },
   actions: {
     flexDirection: "row",
-    gap: 10
+    gap: 10,
+    marginTop: 16,
+    flexWrap: "wrap"
   },
   primaryButton: {
     backgroundColor: "#1f6feb",
     borderRadius: 8,
     paddingHorizontal: 14,
-    paddingVertical: 10
+    paddingVertical: 12
+  },
+  buttonDisabled: {
+    opacity: 0.5
   },
   primaryText: {
     color: "#ffffff",
@@ -131,7 +356,7 @@ const styles = StyleSheet.create({
     borderColor: "#222222",
     borderRadius: 8,
     paddingHorizontal: 14,
-    paddingVertical: 10
+    paddingVertical: 12
   },
   secondaryText: {
     color: "#222222",
@@ -139,6 +364,7 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "#d1242f",
-    fontWeight: "600"
+    fontWeight: "600",
+    marginTop: 8
   }
 });

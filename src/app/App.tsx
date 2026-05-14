@@ -39,9 +39,7 @@ export function App() {
       onRefresh={readings.refreshReadings}
       onOpenReading={readings.loadReadingById}
       onDeleteReading={readings.removeReading}
-      onCreateReading={async (payload) => {
-        await readings.addReading(payload);
-      }}
+      onCreateReading={readings.addReading}
       numerologyResult={numerology.result}
       numerologyError={numerology.error}
       numerologyLoading={numerology.isLoading}

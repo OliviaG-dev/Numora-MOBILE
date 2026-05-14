@@ -44,6 +44,9 @@ export function ReadingDetail({ readingId, onLoad, onBack }: ReadingDetailProps)
             <Text style={styles.title}>
               {reading.firstName} {reading.lastName}
             </Text>
+            {typeof reading.results.readingTitle === "string" && reading.results.readingTitle.trim() ? (
+              <Text style={styles.line}>Lecture : {reading.results.readingTitle.trim()}</Text>
+            ) : null}
             <Text style={styles.line}>Date de naissance : {reading.birthDate.slice(0, 10)}</Text>
             <Text style={styles.line}>Catégorie : {reading.category}</Text>
             <Text style={styles.createdAt}>Créée le : {reading.createdAt.slice(0, 10)}</Text>

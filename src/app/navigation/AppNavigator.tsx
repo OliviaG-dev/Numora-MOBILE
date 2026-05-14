@@ -28,7 +28,7 @@ type AppNavigatorProps = {
   onRefresh: () => Promise<void>;
   onOpenReading: (readingId: string) => Promise<Reading>;
   onDeleteReading: (readingId: string) => Promise<void>;
-  onCreateReading: (payload: CreateReadingPayload) => Promise<void>;
+  onCreateReading: (payload: CreateReadingPayload) => Promise<Reading>;
   numerologyResult: NumerologyResult | null;
   numerologyError: string | null;
   numerologyLoading: boolean;
@@ -145,11 +145,12 @@ export function AppNavigator({
         >
           {() => <CompatibilityAnalyzer />}
         </Stack.Screen>
-        <Stack.Screen name="NewReading" options={{ title: "New reading" }}>
+        <Stack.Screen name="NewReading" options={{ title: "Nouvelle lecture" }}>
           {({ navigation }) => (
             <NewReading
-              onSubmit={onCreateReading}
-              onBack={() => navigation.navigate("Home")}
+              onCreateReading={onCreateReading}
+              onCancel={() => navigation.goBack()}
+              onCreated={(readingId) => navigation.replace("ReadingDetail", { readingId })}
             />
           )}
         </Stack.Screen>

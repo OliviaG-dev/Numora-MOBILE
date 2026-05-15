@@ -56,7 +56,15 @@ export function AppNavigator({
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" options={{ title: "Numora" }}>
+        <Stack.Screen
+          name="Home"
+          options={{
+            title: "Numora",
+            headerStyle: { backgroundColor: "#0f0f23" },
+            headerTintColor: "#ffffff",
+            headerShadowVisible: false
+          }}
+        >
           {({ navigation }) => (
             <Home
               email={email}
@@ -70,10 +78,6 @@ export function AppNavigator({
               onDeleteReading={onDeleteReading}
               onGoToCreate={() => navigation.navigate("NewReading")}
               onGoToReadings={() => navigation.navigate("Readings")}
-              onGoToNumerology={() => navigation.navigate("Numerology")}
-              onGoToMatrixDestiny={() => navigation.navigate("MatrixDestiny")}
-              onGoToTreeOfLife={() => navigation.navigate("TreeOfLife")}
-              onGoToCrystals={() => navigation.navigate("Crystals")}
               onGoToDateAnalyzer={() => navigation.navigate("DateAnalyzer")}
               onGoToNameAnalyzer={() => navigation.navigate("NameAnalyzer")}
               onGoToDailyVibration={() => navigation.navigate("DailyVibration")}

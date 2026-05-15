@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ReadingList } from "../../components/ReadingList/ReadingList";
 import type { Reading } from "../../types/reading.types";
@@ -29,21 +29,21 @@ export function Readings({
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>My readings</Text>
+          <Text style={styles.title}>Mes lectures</Text>
           <Pressable style={styles.primaryButton} onPress={onGoToCreate}>
-            <Text style={styles.primaryText}>New</Text>
+            <Text style={styles.primaryText}>Nouvelle</Text>
           </Pressable>
         </View>
-        {loading ? <Text>Loading readings...</Text> : null}
+        {loading ? <Text>Chargement…</Text> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <ReadingList
           readings={readings}
           onOpen={onOpenReading}
           onDelete={(id) => void onDeleteReading(id)}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

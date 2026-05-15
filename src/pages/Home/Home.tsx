@@ -1,7 +1,18 @@
 import { useEffect } from "react";
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
 
+import { HomeSection } from "../../components/HomeSection/HomeSection";
+import { NumerologyBackground } from "../../components/NumerologyBackground/NumerologyBackground";
 import { ReadingList } from "../../components/ReadingList/ReadingList";
+import { colors, spacing } from "../../styles/theme";
 import type { Reading } from "../../types/reading.types";
 
 type HomeProps = {
@@ -13,10 +24,6 @@ type HomeProps = {
   onOpenReading: (readingId: string) => void;
   onDeleteReading: (readingId: string) => Promise<void>;
   onGoToCreate: () => void;
-  onGoToNumerology: () => void;
-  onGoToMatrixDestiny: () => void;
-  onGoToTreeOfLife: () => void;
-  onGoToCrystals: () => void;
   onGoToDateAnalyzer: () => void;
   onGoToNameAnalyzer: () => void;
   onGoToDailyVibration: () => void;
@@ -37,10 +44,6 @@ export function Home({
   onOpenReading,
   onDeleteReading,
   onGoToCreate,
-  onGoToNumerology,
-  onGoToMatrixDestiny,
-  onGoToTreeOfLife,
-  onGoToCrystals,
   onGoToDateAnalyzer,
   onGoToNameAnalyzer,
   onGoToDailyVibration,
@@ -55,63 +58,76 @@ export function Home({
     void onRefresh();
   }, [onRefresh]);
 
+  const recentReadings = readings.slice(0, 3);
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Welcome</Text>
-        <Text style={styles.subtitle}>{email}</Text>
-        <View style={styles.actions}>
-          <Pressable style={styles.primaryButton} onPress={onGoToCreate}>
-            <Text style={styles.primaryButtonText}>New reading</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToReadings}>
-            <Text style={styles.primaryButtonText}>Readings</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToNumerology}>
-            <Text style={styles.primaryButtonText}>Numerology</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToMatrixDestiny}>
-            <Text style={styles.primaryButtonText}>Matrix destiny</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToTreeOfLife}>
-            <Text style={styles.primaryButtonText}>Tree of life</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToCrystals}>
-            <Text style={styles.primaryButtonText}>Crystals</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToDateAnalyzer}>
-            <Text style={styles.primaryButtonText}>Date analyzer</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToNameAnalyzer}>
-            <Text style={styles.primaryButtonText}>Name analyzer</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToDailyVibration}>
-            <Text style={styles.primaryButtonText}>Daily vibration</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToPlaceVibration}>
-            <Text style={styles.primaryButtonText}>Place vibration</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToCompatibilityAnalyzer}>
-            <Text style={styles.primaryButtonText}>Compatibility</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToProfile}>
-            <Text style={styles.primaryButtonText}>Profile</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={onGoToSettings}>
-            <Text style={styles.primaryButtonText}>Settings</Text>
-          </Pressable>
-          <Pressable style={styles.secondaryButton} onPress={() => void onLogout()}>
-            <Text style={styles.secondaryButtonText}>Logout</Text>
-          </Pressable>
+      <NumerologyBackground />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.topBar}>
+          <Text style={styles.email} numberOfLines={1}>
+            {email}
+          </Text>
+          <View style={styles.topLinks}>
+            <Pressable onPress={onGoToReadings} hitSlop={8}>
+              <Text style={styles.topLink}>Lectures</Text>
+            </Pressable>
+            <Text style={styles.topSep}>·</Text>
+            <Pressable onPress={onGoToProfile} hitSlop={8}>
+              <Text style={styles.topLink}>Profil</Text>
+            </Pressable>
+            <Text style={styles.topSep}>·</Text>
+            <Pressable onPress={onGoToSettings} hitSlop={8}>
+              <Text style={styles.topLink}>Paramètres</Text>
+            </Pressable>
+            <Text style={styles.topSep}>·</Text>
+            <Pressable onPress={() => void onLogout()} hitSlop={8}>
+              <Text style={styles.topLinkMuted}>Déconnexion</Text>
+            </Pressable>
+          </View>
         </View>
-        {loading ? <Text>Loading readings...</Text> : null}
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        <ReadingList
-          readings={readings}
-          onOpen={onOpenReading}
-          onDelete={(id) => void onDeleteReading(id)}
+
+        <HomeSection
+          onGoToCreate={onGoToCreate}
+          onGoToNameAnalyzer={onGoToNameAnalyzer}
+          onGoToDateAnalyzer={onGoToDateAnalyzer}
+          onGoToDailyVibration={onGoToDailyVibration}
+          onGoToPlaceVibration={onGoToPlaceVibration}
+          onGoToCompatibilityAnalyzer={onGoToCompatibilityAnalyzer}
         />
-      </View>
+
+        <View style={styles.readingsBlock}>
+          <View style={styles.readingsHeader}>
+            <Text style={styles.readingsTitle}>Mes lectures</Text>
+            {readings.length > 0 ? (
+              <Pressable onPress={onGoToReadings}>
+                <Text style={styles.readingsSeeAll}>Voir tout</Text>
+              </Pressable>
+            ) : null}
+          </View>
+          {loading ? (
+            <ActivityIndicator color={colors.primaryPurpleLight} style={styles.loader} />
+          ) : null}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {!loading && recentReadings.length > 0 ? (
+            <ReadingList
+              readings={recentReadings}
+              onOpen={onOpenReading}
+              onDelete={(id) => void onDeleteReading(id)}
+              compact
+              variant="dark"
+            />
+          ) : !loading && !error && readings.length === 0 ? (
+            <Text style={styles.readingsEmpty}>
+              Aucune lecture enregistrée. Utilise « Découvre toi » pour commencer.
+            </Text>
+          ) : null}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -119,49 +135,84 @@ export function Home({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f6f7fb"
+    backgroundColor: colors.bgPrimary
   },
-  container: {
+  scroll: {
     flex: 1,
-    padding: 16,
-    gap: 10
+    zIndex: 1
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "800"
+  scrollContent: {
+    paddingBottom: spacing.xl
   },
-  subtitle: {
-    color: "#5f5f5f"
+  topBar: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
+    gap: spacing.xs
   },
-  actions: {
+  email: {
+    fontSize: 12,
+    color: colors.textMuted,
+    textAlign: "center"
+  },
+  topLinks: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
-    marginVertical: 10
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4
   },
-  primaryButton: {
-    backgroundColor: "#1f6feb",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10
+  topLink: {
+    color: colors.secondaryGoldLight,
+    fontWeight: "600",
+    fontSize: 13
   },
-  primaryButtonText: {
-    color: "#ffffff",
-    fontWeight: "700"
+  topLinkMuted: {
+    color: colors.textMuted,
+    fontWeight: "600",
+    fontSize: 13
   },
-  secondaryButton: {
+  topSep: {
+    color: colors.textMuted,
+    fontSize: 13
+  },
+  readingsBlock: {
+    marginTop: spacing.md,
+    marginHorizontal: spacing.md,
+    padding: spacing.md,
+    borderRadius: 12,
+    backgroundColor: "rgba(26, 26, 64, 0.85)",
     borderWidth: 1,
-    borderColor: "#222222",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10
+    borderColor: colors.purpleBorder
   },
-  secondaryButtonText: {
-    color: "#222222",
-    fontWeight: "700"
+  readingsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.sm
+  },
+  readingsTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.textPrimary
+  },
+  readingsSeeAll: {
+    color: colors.secondaryGold,
+    fontWeight: "600",
+    fontSize: 14
+  },
+  readingsEmpty: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center"
+  },
+  loader: {
+    marginVertical: spacing.sm
   },
   error: {
-    color: "#d1242f",
-    fontWeight: "600"
+    color: colors.error,
+    fontWeight: "600",
+    marginBottom: spacing.sm
   }
 });

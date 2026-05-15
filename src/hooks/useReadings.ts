@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 
+import { SKIP_AUTH } from "../config/devAuth";
 import { getApiErrorMessage } from "../services/apiClient";
 import {
   createReading,
@@ -8,6 +9,12 @@ import {
   listReadings
 } from "../services/readingService";
 import type { CreateReadingPayload, Reading } from "../types/reading.types";
+import {
+  createLocalReading,
+  deleteLocalReading,
+  getLocalReadingById,
+  listLocalReadings
+} from "../utils/localReadingsStore";
 
 export function useReadings() {
   const [readings, setReadings] = useState<Reading[]>([]);
@@ -18,6 +25,10 @@ export function useReadings() {
     setIsLoading(true);
     setError(null);
     try {
+      if (SKIP_AUTH) {
+        setReadings(listLocalReadings());
+        return;
+      }
       const response = await listReadings();
       setReadings(response.readings);
     } catch (requestError) {
@@ -30,6 +41,11 @@ export function useReadings() {
   const addReading = useCallback(async (payload: CreateReadingPayload) => {
     setError(null);
     try {
+      if (SKIP_AUTH) {
+        const reading = createLocalReading(payload);
+        setReadings((current) => [reading, ...current]);
+        return reading;
+      }
       const response = await createReading(payload);
       setReadings((current) => [response.reading, ...current]);
       return response.reading;
@@ -41,6 +57,13 @@ export function useReadings() {
   }, []);
 
   const loadReadingById = useCallback(async (readingId: string) => {
+    if (SKIP_AUTH) {
+      const reading = getLocalReadingById(readingId);
+      if (!reading) {
+        throw new Error("Lecture introuvable");
+      }
+      return reading;
+    }
     const response = await getReadingById(readingId);
     return response.reading;
   }, []);
@@ -48,6 +71,11 @@ export function useReadings() {
   const removeReading = useCallback(async (readingId: string) => {
     setError(null);
     try {
+      if (SKIP_AUTH) {
+        deleteLocalReading(readingId);
+        setReadings((current) => current.filter((reading) => reading.id !== readingId));
+        return;
+      }
       await deleteReading(readingId);
       setReadings((current) => current.filter((reading) => reading.id !== readingId));
     } catch (requestError) {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { DEV_MOCK_USER, SKIP_AUTH } from "../config/devAuth";
 import { getApiErrorMessage, setAuthorizationToken } from "../services/apiClient";
 import { login as loginRequest, me, register as registerRequest } from "../services/authService";
 import {
@@ -26,6 +27,14 @@ export function useAuth() {
   }, []);
 
   const bootstrapAuth = useCallback(async () => {
+    if (SKIP_AUTH) {
+      setUser(DEV_MOCK_USER);
+      setToken(null);
+      setAuthorizationToken(null);
+      setIsBootstrapping(false);
+      return;
+    }
+
     try {
       const savedToken = await getAuthToken();
       if (!savedToken) {
@@ -78,6 +87,14 @@ export function useAuth() {
   }, [login]);
 
   const logout = useCallback(async () => {
+    if (SKIP_AUTH) {
+      setUser(DEV_MOCK_USER);
+      setToken(null);
+      setAuthorizationToken(null);
+      setError(null);
+      return;
+    }
+
     await clearAuthToken();
     setAuthorizationToken(null);
     setToken(null);
@@ -85,15 +102,18 @@ export function useAuth() {
     setError(null);
   }, []);
 
+  const isAuthenticated = SKIP_AUTH ? Boolean(user) : Boolean(user && token);
+
   return {
     user,
     token,
-    isAuthenticated: Boolean(user && token),
+    isAuthenticated,
     isBootstrapping,
     isSubmitting,
     error,
     login,
     register,
-    logout
+    logout,
+    skipAuth: SKIP_AUTH
   };
 }

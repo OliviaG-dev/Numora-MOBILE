@@ -41,6 +41,28 @@ cp .env.example .env.local
 npm run start
 ```
 
+### Web (navigateur)
+
+1. Copier `.env.example` vers `.env.local` et definir `EXPO_PUBLIC_API_URL` (ex. `http://localhost:3000` pour le web sur la meme machine).
+2. Demarrer l'API Numora (`Numora-API`) sur le port 3000.
+3. Installer les dependances web (deja incluses apres `npm install`) :
+
+```bash
+npx expo install react-dom react-native-web @expo/metro-runtime
+```
+
+4. Lancer :
+
+```bash
+npm run web
+```
+
+Ouvre l'URL affichee dans le terminal (souvent `http://localhost:8081`).
+
+Sur **web**, le token d'authentification est stocke dans `localStorage` (fallback ; `expo-secure-store` sur mobile).
+
+Pour **Expo Go** sur telephone, remplace `localhost` par l'IP LAN de ton PC dans `.env.local`.
+
 ## Scripts disponibles
 
 - `npm run start` : demarre Expo

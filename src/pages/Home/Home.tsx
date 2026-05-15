@@ -12,6 +12,7 @@ import {
 import { HomeSection } from "../../components/HomeSection/HomeSection";
 import { NumerologyBackground } from "../../components/NumerologyBackground/NumerologyBackground";
 import { ReadingList } from "../../components/ReadingList/ReadingList";
+import { SKIP_AUTH } from "../../config/devAuth";
 import { colors, spacing } from "../../styles/theme";
 import type { Reading } from "../../types/reading.types";
 
@@ -69,6 +70,9 @@ export function Home({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topBar}>
+          {SKIP_AUTH ? (
+            <Text style={styles.devBanner}>Mode démo — sans connexion (lectures locales)</Text>
+          ) : null}
           <Text style={styles.email} numberOfLines={1}>
             {email}
           </Text>
@@ -149,6 +153,13 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
     gap: spacing.xs
+  },
+  devBanner: {
+    fontSize: 12,
+    color: colors.secondaryGoldLight,
+    textAlign: "center",
+    fontWeight: "600",
+    marginBottom: 4
   },
   email: {
     fontSize: 12,

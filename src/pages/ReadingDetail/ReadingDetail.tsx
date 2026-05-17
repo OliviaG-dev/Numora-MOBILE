@@ -3,6 +3,7 @@ import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "rea
 
 import { ReadingDetailTabs } from "../../components/ReadingDetailTabs/ReadingDetailTabs";
 import { getApiErrorMessage } from "../../services/apiClient";
+import { formatIsoToEuropean } from "../../utils/europeanDate";
 import type { Reading } from "../../types/reading.types";
 
 type ReadingDetailProps = {
@@ -47,7 +48,9 @@ export function ReadingDetail({ readingId, onLoad, onBack }: ReadingDetailProps)
             {typeof reading.results.readingTitle === "string" && reading.results.readingTitle.trim() ? (
               <Text style={styles.line}>Lecture : {reading.results.readingTitle.trim()}</Text>
             ) : null}
-            <Text style={styles.line}>Date de naissance : {reading.birthDate.slice(0, 10)}</Text>
+            <Text style={styles.line}>
+              Date de naissance : {formatIsoToEuropean(reading.birthDate.slice(0, 10))}
+            </Text>
             <Text style={styles.line}>Catégorie : {reading.category}</Text>
             <Text style={styles.createdAt}>Créée le : {reading.createdAt.slice(0, 10)}</Text>
           </View>

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { EU_DATE_FORMAT_LABEL, parseDateInputToIso } from "../../utils/europeanDate";
 import type { NumerologyResult } from "../../types/numerology.types";
 
 export function NameAnalyzer() {
@@ -14,11 +16,16 @@ export function NameAnalyzer() {
 
   const analyzeName = async () => {
     setError(null);
+    const birthDateIso = parseDateInputToIso(birthDate);
+    if (!birthDateIso) {
+      setError(`Date invalide (${EU_DATE_FORMAT_LABEL}).`);
+      return;
+    }
     setIsLoading(true);
     try {
       const response = await calculateNumerology({
         fullName: fullName.trim(),
-        birthDate: birthDate.trim()
+        birthDate: birthDateIso
       });
       setResult(response.result);
     } catch (requestError) {
@@ -39,12 +46,7 @@ export function NameAnalyzer() {
           placeholder="Full name / project name"
           style={styles.input}
         />
-        <TextInput
-          value={birthDate}
-          onChangeText={setBirthDate}
-          placeholder="Reference birth date (YYYY-MM-DD)"
-          style={styles.input}
-        />
+        <EuropeanDateInput value={birthDate} onChangeText={setBirthDate} inputStyle={styles.input} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Pressable
           onPress={() => void analyzeName()}

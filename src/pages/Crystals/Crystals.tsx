@@ -2,9 +2,11 @@ import { useMemo, useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { CrystalProfile } from "../../components/CrystalProfile/CrystalProfile";
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { useCrystalProfile } from "../../hooks/useCrystalProfile";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { EU_DATE_FORMAT_LABEL, parseDateInputToIso } from "../../utils/europeanDate";
 
 export function Crystals() {
   const [fullName, setFullName] = useState("");
@@ -24,10 +26,16 @@ export function Crystals() {
     setIsCalculating(true);
     setLifePath(null);
     setExpression(null);
+    const birthDateIso = parseDateInputToIso(birthDate);
+    if (!birthDateIso) {
+      setNumerologyError(`Date de naissance invalide (${EU_DATE_FORMAT_LABEL}).`);
+      setIsCalculating(false);
+      return;
+    }
     try {
       const response = await calculateNumerology({
         fullName: fullName.trim(),
-        birthDate: birthDate.trim()
+        birthDate: birthDateIso
       });
       const core = response.result.core as Record<string, unknown>;
       const lp = Number(core.lifePath);
@@ -64,12 +72,7 @@ export function Crystals() {
           onChangeText={setFullName}
           style={styles.input}
         />
-        <TextInput
-          placeholder="Date de naissance (YYYY-MM-DD)"
-          value={birthDate}
-          onChangeText={setBirthDate}
-          style={styles.input}
-        />
+        <EuropeanDateInput value={birthDate} onChangeText={setBirthDate} inputStyle={styles.input} />
 
         {numerologyError ? <Text style={styles.error}>{numerologyError}</Text> : null}
 

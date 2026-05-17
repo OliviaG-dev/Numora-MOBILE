@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { NumerologySummary } from "../../components/NumerologySummary/NumerologySummary";
 import type { NumerologyResult } from "../../types/numerology.types";
+import { EU_DATE_FORMAT_LABEL, parseDateInputToIso } from "../../utils/europeanDate";
 
 type NumerologyProps = {
   loading: boolean;
@@ -25,12 +27,24 @@ export function Numerology({ loading, error, result, onCalculate }: NumerologyPr
   const [streetName, setStreetName] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    const birthDateIso = parseDateInputToIso(birthDate);
+    if (!birthDateIso) {
+      setLocalError(`Date de naissance invalide (${EU_DATE_FORMAT_LABEL}).`);
+      return;
+    }
+    const referenceDateIso = referenceDate.trim() ? parseDateInputToIso(referenceDate) : null;
+    if (referenceDate.trim() && !referenceDateIso) {
+      setLocalError(`Date de référence invalide (${EU_DATE_FORMAT_LABEL}).`);
+      return;
+    }
+    setLocalError(null);
     await onCalculate({
       fullName: fullName.trim(),
-      birthDate: birthDate.trim(),
-      referenceDate: referenceDate.trim() || undefined,
+      birthDate: birthDateIso,
+      referenceDate: referenceDateIso ?? undefined,
       address:
         streetNumber.trim() && streetName.trim()
           ? { streetNumber: streetNumber.trim(), streetName: streetName.trim() }
@@ -52,17 +66,16 @@ export function Numerology({ loading, error, result, onCalculate }: NumerologyPr
           onChangeText={setFullName}
           style={styles.input}
         />
-        <TextInput
-          placeholder="Birth date (YYYY-MM-DD)"
+        <EuropeanDateInput
           value={birthDate}
           onChangeText={setBirthDate}
-          style={styles.input}
+          inputStyle={styles.input}
         />
-        <TextInput
-          placeholder="Reference date (optional)"
+        <EuropeanDateInput
           value={referenceDate}
           onChangeText={setReferenceDate}
-          style={styles.input}
+          placeholder={`Référence (${EU_DATE_FORMAT_LABEL})`}
+          inputStyle={styles.input}
         />
         <Text style={styles.section}>Address (optional)</Text>
         <TextInput
@@ -85,6 +98,7 @@ export function Numerology({ loading, error, result, onCalculate }: NumerologyPr
           style={styles.input}
         />
         <TextInput placeholder="City" value={city} onChangeText={setCity} style={styles.input} />
+        {localError ? <Text style={styles.error}>{localError}</Text> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Pressable
           style={[styles.button, loading && styles.buttonDisabled]}

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { EU_DATE_FORMAT_LABEL, parseDateInputToIso } from "../../utils/europeanDate";
 
 type CompatibilityKind = "love" | "friendship" | "work";
 
@@ -126,16 +128,22 @@ export function CompatibilityAnalyzer() {
 
   const analyze = async () => {
     setError(null);
+    const p1BirthIso = parseDateInputToIso(person1BirthDate);
+    const p2BirthIso = parseDateInputToIso(person2BirthDate);
+    if (!p1BirthIso || !p2BirthIso) {
+      setError(`Dates de naissance invalides (${EU_DATE_FORMAT_LABEL}).`);
+      return;
+    }
     setIsLoading(true);
     try {
       const [p1, p2] = await Promise.all([
         calculateNumerology({
           fullName: person1Name.trim(),
-          birthDate: person1BirthDate.trim()
+          birthDate: p1BirthIso
         }),
         calculateNumerology({
           fullName: person2Name.trim(),
-          birthDate: person2BirthDate.trim()
+          birthDate: p2BirthIso
         })
       ]);
 
@@ -237,11 +245,10 @@ export function CompatibilityAnalyzer() {
             placeholder="Full name"
             style={styles.input}
           />
-          <TextInput
+          <EuropeanDateInput
             value={person1BirthDate}
             onChangeText={setPerson1BirthDate}
-            placeholder="Birth date (YYYY-MM-DD)"
-            style={styles.input}
+            inputStyle={styles.input}
           />
         </View>
 
@@ -253,11 +260,10 @@ export function CompatibilityAnalyzer() {
             placeholder="Full name"
             style={styles.input}
           />
-          <TextInput
+          <EuropeanDateInput
             value={person2BirthDate}
             onChangeText={setPerson2BirthDate}
-            placeholder="Birth date (YYYY-MM-DD)"
-            style={styles.input}
+            inputStyle={styles.input}
           />
         </View>
 

@@ -3,6 +3,7 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { formatIsoToEuropean, getTodayIso } from "../../utils/europeanDate";
 import type { NumerologyResult } from "../../types/numerology.types";
 
 export function DailyVibration() {
@@ -10,7 +11,8 @@ export function DailyVibration() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const todayIso = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const todayIso = useMemo(() => getTodayIso(), []);
+  const todayEuropean = useMemo(() => formatIsoToEuropean(todayIso), [todayIso]);
 
   useEffect(() => {
     void (async () => {
@@ -38,7 +40,7 @@ export function DailyVibration() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Daily Vibration</Text>
-        <Text style={styles.subtitle}>{todayIso}</Text>
+        <Text style={styles.subtitle}>{todayEuropean}</Text>
         {isLoading ? <Text>Loading...</Text> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {result ? (

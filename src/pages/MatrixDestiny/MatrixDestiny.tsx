@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { EU_DATE_FORMAT_LABEL, parseDateInputToIso } from "../../utils/europeanDate";
 import { buildStructuredSections } from "../../utils/structuredPayload";
 
 type MatrixDestinyProps = {
@@ -19,10 +21,16 @@ export function MatrixDestiny({ initialMatrix }: MatrixDestinyProps) {
   const handleCalculate = async () => {
     setError(null);
     setIsLoading(true);
+    const birthDateIso = parseDateInputToIso(birthDate);
+    if (!birthDateIso) {
+      setError(`Date de naissance invalide (${EU_DATE_FORMAT_LABEL}).`);
+      setIsLoading(false);
+      return;
+    }
     try {
       const response = await calculateNumerology({
         fullName: fullName.trim(),
-        birthDate: birthDate.trim()
+        birthDate: birthDateIso
       });
       setMatrix(response.result.matrixDestiny);
     } catch (requestError) {
@@ -47,12 +55,7 @@ export function MatrixDestiny({ initialMatrix }: MatrixDestinyProps) {
           onChangeText={setFullName}
           style={styles.input}
         />
-        <TextInput
-          placeholder="Birth date (YYYY-MM-DD)"
-          value={birthDate}
-          onChangeText={setBirthDate}
-          style={styles.input}
-        />
+        <EuropeanDateInput value={birthDate} onChangeText={setBirthDate} inputStyle={styles.input} />
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { EU_DATE_FORMAT_LABEL, parseDateInputToIso } from "../../utils/europeanDate";
 import type { NumerologyResult } from "../../types/numerology.types";
 
 export function PlaceVibration() {
@@ -18,10 +20,16 @@ export function PlaceVibration() {
   const analyze = async () => {
     setError(null);
     setIsLoading(true);
+    const birthDateIso = birthDate.trim() ? parseDateInputToIso(birthDate) : "1990-01-01";
+    if (birthDate.trim() && !birthDateIso) {
+      setError(`Date invalide (${EU_DATE_FORMAT_LABEL}).`);
+      setIsLoading(false);
+      return;
+    }
     try {
       const response = await calculateNumerology({
         fullName: "Place Vibration",
-        birthDate: birthDate.trim() || "1990-01-01",
+        birthDate: birthDateIso ?? "1990-01-01",
         address:
           streetNumber.trim() && streetName.trim()
             ? { streetNumber: streetNumber.trim(), streetName: streetName.trim() }
@@ -65,11 +73,11 @@ export function PlaceVibration() {
           style={styles.input}
         />
         <TextInput value={city} onChangeText={setCity} placeholder="City" style={styles.input} />
-        <TextInput
+        <EuropeanDateInput
           value={birthDate}
           onChangeText={setBirthDate}
-          placeholder="Birth date for compatibility (optional)"
-          style={styles.input}
+          placeholder={`Naissance (${EU_DATE_FORMAT_LABEL}, optionnel)`}
+          inputStyle={styles.input}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Pressable

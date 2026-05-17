@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import { EU_DATE_FORMAT_LABEL, parseDateInputToIso } from "../../utils/europeanDate";
 import type { NumerologyResult } from "../../types/numerology.types";
 
 export function DateAnalyzer() {
@@ -14,12 +16,22 @@ export function DateAnalyzer() {
 
   const analyzeDate = async () => {
     setError(null);
+    const dateIso = parseDateInputToIso(birthDate);
+    if (!dateIso) {
+      setError(`Date invalide. Utilise le format ${EU_DATE_FORMAT_LABEL}.`);
+      return;
+    }
+    const referenceIso = referenceDate.trim() ? parseDateInputToIso(referenceDate) : null;
+    if (referenceDate.trim() && !referenceIso) {
+      setError(`Date de référence invalide (${EU_DATE_FORMAT_LABEL}).`);
+      return;
+    }
     setIsLoading(true);
     try {
       const response = await calculateNumerology({
         fullName: "Date Analyzer",
-        birthDate: birthDate.trim(),
-        referenceDate: referenceDate.trim() || undefined
+        birthDate: dateIso,
+        referenceDate: referenceIso ?? undefined
       });
       setResult(response.result);
     } catch (requestError) {
@@ -34,17 +46,12 @@ export function DateAnalyzer() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Date Analyzer</Text>
-        <TextInput
-          value={birthDate}
-          onChangeText={setBirthDate}
-          placeholder="Date to analyze (YYYY-MM-DD)"
-          style={styles.input}
-        />
-        <TextInput
+        <EuropeanDateInput value={birthDate} onChangeText={setBirthDate} inputStyle={styles.input} />
+        <EuropeanDateInput
           value={referenceDate}
           onChangeText={setReferenceDate}
-          placeholder="Reference date (optional)"
-          style={styles.input}
+          placeholder={`Référence (${EU_DATE_FORMAT_LABEL})`}
+          inputStyle={styles.input}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Pressable

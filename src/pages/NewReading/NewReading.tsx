@@ -9,8 +9,13 @@ import {
   View
 } from "react-native";
 
+import { EuropeanDateInput } from "../../components/EuropeanDateInput/EuropeanDateInput";
 import { getApiErrorMessage } from "../../services/apiClient";
 import { calculateNumerology } from "../../services/numerologyService";
+import {
+  EU_DATE_FORMAT_LABEL,
+  parseDateInputToIso
+} from "../../utils/europeanDate";
 import type { NumerologyCalculatePayload } from "../../types/numerology.types";
 import {
   READING_CATEGORIES,
@@ -40,14 +45,6 @@ function joinTrimmedParts(parts: Array<string | undefined>): string {
     .join(" ");
 }
 
-function isValidIsoDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    return false;
-  }
-  const d = new Date(`${value.trim()}T12:00:00.000Z`);
-  return !Number.isNaN(d.getTime());
-}
-
 export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingProps) {
   const [readingTitle, setReadingTitle] = useState("");
   const [firstGivenName, setFirstGivenName] = useState("");
@@ -66,7 +63,7 @@ export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingP
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const buildNumerologyPayload = (): NumerologyCalculatePayload => {
+  const buildNumerologyPayload = (birthDateIso: string, referenceDateIso?: string): NumerologyCalculatePayload => {
     const fullName = joinTrimmedParts([
       firstGivenName,
       secondGivenName,
@@ -75,8 +72,8 @@ export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingP
     ]);
     return {
       fullName,
-      birthDate: birthDate.trim(),
-      referenceDate: referenceDate.trim() || undefined,
+      birthDate: birthDateIso,
+      referenceDate: referenceDateIso,
       address:
         streetNumber.trim() && streetName.trim()
           ? { streetNumber: streetNumber.trim(), streetName: streetName.trim() }
@@ -96,13 +93,13 @@ export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingP
       return "Le nom de famille est obligatoire.";
     }
     if (!birthDate.trim()) {
-      return "La date de naissance est obligatoire (AAAA-MM-JJ).";
+      return `La date de naissance est obligatoire (${EU_DATE_FORMAT_LABEL}).`;
     }
-    if (!isValidIsoDate(birthDate)) {
-      return "La date de naissance doit être au format AAAA-MM-JJ valide.";
+    if (!parseDateInputToIso(birthDate)) {
+      return `La date de naissance doit être au format ${EU_DATE_FORMAT_LABEL} valide.`;
     }
-    if (referenceDate.trim() && !isValidIsoDate(referenceDate)) {
-      return "La date de référence doit être au format AAAA-MM-JJ valide.";
+    if (referenceDate.trim() && !parseDateInputToIso(referenceDate)) {
+      return `La date de référence doit être au format ${EU_DATE_FORMAT_LABEL} valide.`;
     }
     return null;
   };
@@ -115,9 +112,19 @@ export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingP
       return;
     }
 
+    const birthDateIso = parseDateInputToIso(birthDate);
+    const referenceDateIso = referenceDate.trim() ? parseDateInputToIso(referenceDate) : null;
+    if (!birthDateIso) {
+      setError(`La date de naissance doit être au format ${EU_DATE_FORMAT_LABEL} valide.`);
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const numerologyPayload = buildNumerologyPayload();
+      const numerologyPayload = buildNumerologyPayload(
+        birthDateIso,
+        referenceDateIso ?? undefined
+      );
       const { result } = await calculateNumerology(numerologyPayload);
 
       const results = numerologyResultToReadingResults(result);
@@ -129,7 +136,7 @@ export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingP
       const payload: CreateReadingPayload = {
         firstName,
         lastName: familyName.trim(),
-        birthDate: birthDate.trim(),
+        birthDate: birthDateIso,
         category,
         results
       };
@@ -194,14 +201,8 @@ export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingP
           autoCapitalize="words"
         />
 
-        <Text style={styles.sectionLabel}>Date de naissance * (AAAA-MM-JJ)</Text>
-        <TextInput
-          placeholder="1990-05-14"
-          value={birthDate}
-          onChangeText={setBirthDate}
-          style={styles.input}
-          keyboardType="numbers-and-punctuation"
-        />
+        <Text style={styles.sectionLabel}>Date de naissance * ({EU_DATE_FORMAT_LABEL})</Text>
+        <EuropeanDateInput value={birthDate} onChangeText={setBirthDate} inputStyle={styles.input} />
 
         <Text style={styles.sectionLabel}>Catégorie</Text>
         <View style={styles.categoryRow}>
@@ -219,13 +220,8 @@ export function NewReading({ onCreateReading, onCancel, onCreated }: NewReadingP
         </View>
 
         <Text style={styles.sectionLabel}>Options de calcul (optionnel)</Text>
-        <TextInput
-          placeholder="Date de référence (AAAA-MM-JJ)"
-          value={referenceDate}
-          onChangeText={setReferenceDate}
-          style={styles.input}
-          keyboardType="numbers-and-punctuation"
-        />
+        <Text style={styles.subSection}>Date de référence ({EU_DATE_FORMAT_LABEL})</Text>
+        <EuropeanDateInput value={referenceDate} onChangeText={setReferenceDate} inputStyle={styles.input} />
         <Text style={styles.subSection}>Adresse</Text>
         <TextInput
           placeholder="Numéro de rue"
